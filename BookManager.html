@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookManager - Your Digital Library</title>
+  <!-- Copilot: Added Google Fonts for better typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #151515;
+      --surface2: #252525;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --accent: #8b6bb8;
+      --accent-dim: rgba(139,107,184,0.15);
+      --text: #f5f1e8;
+      --muted: #9a9a9a;
+      --danger: #e74c3c;
+      --gold: #d4af37;
+      --success: #27ae60;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg) 0%, #1a1410 100%);
+      color: var(--text);
+      font-family: 'Lora', serif;
+      min-height: 100vh;
+      padding: 0;
+      /* Copilot: Added book-themed background pattern */
+      background-attachment: fixed;
+    }
+
+    /* Copilot: Book spine decoration */
+    body::before {
+      content: '';
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--gold) 0%, var(--accent) 50%, var(--gold) 100%);
+      opacity: 0.2;
+      pointer-events: none;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2rem;
+      border-bottom: 0.5px solid var(--border);
+      background: linear-gradient(90deg, rgba(139,107,184,0.1) 0%, rgba(212,175,55,0.05) 100%);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Playfair Display', serif;
+      text-transform: uppercase;
+    }
+
+    .nav-logo svg { opacity: 0.9; filter: drop-shadow(0 0 8px rgba(212,175,55,0.3)); }
+
+    .nav-status {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #3a3a3a;
+    }
+    .dot.online { background: #4caf7d; box-shadow: 0 0 6px #4caf7d88; }
+    .dot.offline { background: var(--danger); }
+
+    main { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem; }
+
+    .hero { margin-bottom: 3rem; text-align: center; }
+    .hero h1 {
+      /* Copilot: Styled with elegant serif font for book theme */
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--gold);
+      margin-bottom: 8px;
+      font-family: 'Playfair Display', serif;
+      text-shadow: 0 4px 12px rgba(212,175,55,0.2);
+    }
+    .hero p { 
+      font-size: 15px; 
+      color: var(--muted);
+      /* Copilot: Italic text for literary feel */
+      font-style: italic;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
+
+    .search-wrap {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    input[type="text"], input[type="date"] {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 11px 13px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      font-family: 'Lora', serif;
+    }
+
+    input[type="text"]:focus, input[type="date"]:focus {
+      border-color: var(--gold);
+      background: var(--surface2);
+      /* Copilot: Added glow effect on focus */
+      box-shadow: 0 0 12px rgba(212,175,55,0.2);
+    }
+
+    .search-wrap input { width: 100%; padding-left: 36px; }
+
+    button {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 11px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    button:hover { 
+      background: var(--surface2); 
+      border-color: var(--gold);
+      /* Copilot: Added hover glow */
+      box-shadow: 0 4px 12px rgba(212,175,55,0.15);
+    }
+    
+    button.primary { 
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+      border-color: var(--gold); 
+      color: #fff; 
+      font-weight: 600;
+    }
+    
+    button.primary:hover { 
+      background: linear-gradient(135deg, #9b7bc8 0%, #e4c158 100%);
+      box-shadow: 0 6px 16px rgba(212,175,55,0.25);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat {
+      background: linear-gradient(135deg, var(--surface) 0%, rgba(212,175,55,0.05) 100%);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 16px;
+      /* Copilot: Added decorative border top */
+      border-top: 2px solid var(--gold);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .stat-label { 
+      font-size: 11px; 
+      color: var(--muted); 
+      text-transform: uppercase; 
+      letter-spacing: 0.08em; 
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .stat-value { 
+      font-size: 28px; 
+      font-weight: 700; 
+      color: var(--gold);
+      /* Copilot: Serif font for elegant numbers */
+      font-family: 'Playfair Display', serif;
+    }
+
+    .section-title {
+      font-size: 12px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      /* Copilot: Added serif font for section title */
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Copilot: Decorative line before section title */
+    .section-title::before {
+      content: '';
+      flex: 0 0 8px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--accent) 100%);
+    }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 2.5rem;
+    }
+
+    .book-card {
+      background: linear-gradient(135deg, var(--surface) 0%, rgba(139,107,184,0.08) 100%);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Copilot: Added book-like shadow */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Copilot: Decorative top accent for book cards */
+    .book-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--accent) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .book-card:hover { 
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--surface2) 0%, rgba(139,107,184,0.15) 100%);
+      box-shadow: 0 12px 24px rgba(139,107,184,0.2);
+      transform: translateY(-4px);
+    }
+
+    .book-card:hover::before { opacity: 1; }
+
+    .book-card.selected { 
+      border-color: var(--gold);
+      background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(139,107,184,0.1) 100%);
+      box-shadow: 0 8px 20px rgba(212,175,55,0.15);
+    }
+
+    .book-thumb {
+      width: 48px; 
+      height: 64px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+      border-radius: 6px;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      margin-bottom: 12px;
+      /* Copilot: Added shadow for 3D effect */
+      box-shadow: 0 4px 12px rgba(139,107,184,0.3);
+    }
+
+    .book-thumb svg { opacity: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    .book-card h3 { 
+      font-size: 14px; 
+      font-weight: 600; 
+      margin-bottom: 6px; 
+      line-height: 1.4;
+      /* Copilot: Added serif font for book title */
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+    }
+    /* Copilot: Added author display */
+    .book-author { 
+      font-size: 12px; 
+      color: var(--muted); 
+      margin-bottom: 4px;
+      font-style: italic;
+    }
+    .book-card .book-year { font-size: 11px; color: var(--muted); opacity: 0.8; }
+    .book-id { 
+      display: inline-block; 
+      background: rgba(212,175,55,0.1); 
+      color: var(--gold); 
+      font-size: 10px; 
+      padding: 3px 8px; 
+      border-radius: 4px; 
+      margin-top: 8px;
+      border: 0.5px solid rgba(212,175,55,0.2);
+    }
+
+    .detail {
+      background: linear-gradient(135deg, var(--surface2) 0%, rgba(139,107,184,0.08) 100%);
+      border: 1px solid var(--accent-dim);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      /* Copilot: Added decorative shadow */
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .detail h2 { 
+      font-size: 24px; 
+      font-weight: 600;
+      /* Copilot: Serif font for elegant title */
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+    }
+    .detail-meta { 
+      font-size: 13px; 
+      color: var(--muted); 
+      margin-top: 6px;
+      font-style: italic;
+    }
+    /* Copilot: Added author info display in details */
+    .detail-author {
+      font-size: 14px;
+      color: var(--accent);
+      margin-top: 8px;
+      font-weight: 600;
+    }
+    .close-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 2px; font-size: 18px; }
+    .close-btn:hover { color: var(--text); background: none; }
+
+    .add-form {
+      background: linear-gradient(135deg, var(--surface2) 0%, rgba(139,107,184,0.1) 100%);
+      border: 1px solid var(--accent-dim);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      /* Copilot: Added shadow for book-like depth */
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(212,175,55,0.1);
+    }
+
+    .add-form h3 { 
+      font-size: 16px; 
+      font-weight: 600; 
+      margin-bottom: 1.2rem; 
+      color: var(--gold);
+      /* Copilot: Serif font for title */
+      font-family: 'Playfair Display', serif;
+    }
+    .form-row { 
+      display: flex; 
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .form-row input { 
+      flex: 1;
+      /* Copilot: Minimum width for responsive design */
+      min-width: 150px;
+    }
+    /* Copilot: Styled input fields with better visual hierarchy */
+    .form-row input::placeholder {
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    .empty, .loading-msg {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .error-bar {
+      background: rgba(226,75,74,0.12);
+      border: 0.5px solid rgba(226,75,74,0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #f09595;
+      margin-bottom: 1.5rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text);
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    BookManager
+  </div>
+  <div class="nav-status">
+    <div class="dot" id="status-dot"></div>
+    <span id="status-text">Connecting...</span>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>Your library</h1>
+    <p>Connected to BookApi at localhost:5019</p>
+  </div>
+
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Search books..." oninput="filterBooks()">
+    </div>
+    <button onclick="loadBooks()">↻ Refresh</button>
+    <button onclick="toggleForm()" id="add-btn">+ Add book</button>
+  </div>
+
+  <div class="add-form" id="add-form" style="display:none">
+    <h3>📚 Add a new book</h3>
+    <!-- Copilot: Added three input fields for Book Title, Author, and Date of Publish -->
+    <div class="form-row">
+      <input type="text" id="new-title" placeholder="Book Title" />
+      <input type="text" id="new-author" placeholder="Book Author" />
+      <input type="date" id="new-date" />
+      <button class="primary" onclick="addBook()">+ Add</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total books</div><div class="stat-value" id="total">—</div></div>
+    <div class="stat"><div class="stat-label">Showing</div><div class="stat-value" id="showing">—</div></div>
+    <div class="stat"><div class="stat-label">Latest year</div><div class="stat-value" id="latest">—</div></div>
+  </div>
+
+  <div id="error-area"></div>
+  <div id="detail-area"></div>
+
+  <div class="section-title">All books</div>
+  <div id="books-area"><div class="loading-msg">Loading...</div></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:5019/api';
+let allBooks = [];
+let selectedId = null;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function toggleForm() {
+  const f = document.getElementById('add-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function loadBooks() {
+  document.getElementById('books-area').innerHTML = '<div class="loading-msg">Loading...</div>';
+  document.getElementById('error-area').innerHTML = '';
+  try {
+    const res = await fetch(`${API}/book`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    allBooks = await res.json();
+    document.getElementById('status-dot').className = 'dot online';
+    document.getElementById('status-text').textContent = 'API online';
+    updateStats(allBooks);
+    renderBooks(allBooks);
+  } catch(e) {
+    document.getElementById('status-dot').className = 'dot offline';
+    document.getElementById('status-text').textContent = 'API offline';
+    document.getElementById('error-area').innerHTML = `<div class="error-bar">Could not connect to API. Make sure <code>dotnet run</code> is running.</div>`;
+    document.getElementById('books-area').innerHTML = '';
+    document.getElementById('total').textContent = '0';
+    document.getElementById('showing').textContent = '0';
+    document.getElementById('latest').textContent = '—';
+  }
+}
+
+function updateStats(books) {
+  document.getElementById('total').textContent = allBooks.length;
+  document.getElementById('showing').textContent = books.length;
+  const years = books.map(b => new Date(b.publishedDate).getFullYear()).filter(Boolean);
+  document.getElementById('latest').textContent = years.length ? Math.max(...years) : '—';
+}
+
+function filterBooks() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = allBooks.filter(b => b.title.toLowerCase().includes(q));
+  updateStats(filtered);
+  renderBooks(filtered);
+}
+
+function renderBooks(books) {
+  if (!books.length) {
+    document.getElementById('books-area').innerHTML = '<div class="empty">No books found</div>';
+    return;
+  }
+  document.getElementById('books-area').innerHTML = `<div class="books-grid">${books.map(b => {
+    // Copilot: Extract author names from BookAuthor objects (access via a.author property)
+    const authorNames = b.authors && b.authors.length > 0 
+      ? b.authors.map(a => `${a.author.firstName} ${a.author.secondName}`).join(', ')
+      : 'Unknown Author';
+    return `
+    <div class="book-card${b.id === selectedId ? ' selected' : ''}" onclick="showDetail(${b.id})">
+      <div class="book-thumb">
+        <svg width="16" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </div>
+      <h3>${b.title}</h3>
+      <div class="book-author">${authorNames}</div>
+      <div class="book-year">${new Date(b.publishedDate).getFullYear()}</div>
+      <span class="book-id">#${b.id}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function showDetail(id) {
+  selectedId = id;
+  filterBooks();
+  try {
+    const res = await fetch(`${API}/book/${id}`);
+    if (!res.ok) throw new Error();
+    const b = await res.json();
+    // Copilot: Fixed to access author data via a.author property in BookAuthor objects
+    const authorNames = b.authors && b.authors.length > 0 
+      ? b.authors.map(a => `${a.author.firstName} ${a.author.secondName}`).join(', ')
+      : 'Unknown Author';
+    document.getElementById('detail-area').innerHTML = `
+      <div class="detail">
+        <div class="detail-header">
+          <div>
+            <h2>${b.title}</h2>
+            <div class="detail-author">by ${authorNames}</div>
+            <div class="detail-meta">Published ${new Date(b.publishedDate).toLocaleDateString('en-GB', {year:'numeric',month:'long',day:'numeric'})} &nbsp;·&nbsp; ID #${b.id}</div>
+          </div>
+          <button class="close-btn" onclick="closeDetail()">✕</button>
+        </div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('detail-area').innerHTML = `<div class="error-bar">Could not load book details.</div>`;
+  }
+}
+
+function closeDetail() {
+  selectedId = null;
+  document.getElementById('detail-area').innerHTML = '';
+  filterBooks();
+}
+
+async function addBook() {
+  const title = document.getElementById('new-title').value.trim();
+  const author = document.getElementById('new-author').value.trim();
+  const date = document.getElementById('new-date').value;
+  // Copilot: Validate all three required fields
+  if (!title || !author || !date) { showToast('Fill in title, author, and date'); return; }
+  try {
+    const res = await fetch(`${API}/book`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // Copilot: Include author name in the request body
+      body: JSON.stringify({ title, author, publishedDate: date })
+    });
+    if (!res.ok) throw new Error();
+    document.getElementById('new-title').value = '';
+    document.getElementById('new-author').value = '';
+    document.getElementById('new-date').value = '';
+    document.getElementById('add-form').style.display = 'none';
+    showToast('✓ Book added successfully');
+    loadBooks();
+  } catch(e) {
+    showToast('Failed — check if POST endpoint handles author data');
+  }
+}
+
+loadBooks();
+</script>
+</body>
+</html>
