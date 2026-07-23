@@ -20,7 +20,6 @@ A RESTful Book Management API built with ASP.NET Core 10 and Entity Framework Co
 | Database | SQL Server |
 | Mapping | AutoMapper |
 | Architecture | Repository Pattern |
-| Frontend | Custom HTML/CSS/JS |
 
 ## Endpoints
 ### Books
