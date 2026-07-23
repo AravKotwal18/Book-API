@@ -1,8 +1,7 @@
 namespace BookApi.Dto
 {
-    public class BookDto
+    public class DeleteBookDto
     {
-        public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public DateTime PublishedDate { get; set; }
     }

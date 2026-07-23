@@ -160,3 +160,4 @@ E:\C#\BookApi\obj\Debug\net10.0\ref\BookApi.dll
 E:\C#\BookApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
 E:\C#\BookApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 E:\C#\BookApi\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+E:\C#\BookApi\obj\Debug\net10.0\BookApi.sourcelink.json

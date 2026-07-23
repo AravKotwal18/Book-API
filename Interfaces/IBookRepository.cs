@@ -8,7 +8,8 @@ namespace BookApi.Interfaces
         Book? GetBook (int id);
         Book? GetBook (string name);
         bool BookExists (int id);
-        // Copilot: Add method to create new books
         bool CreateBook(Book book);
+        bool UpdateBook(Book book);
+        bool DeleteBook (Book book);
     }
 }
